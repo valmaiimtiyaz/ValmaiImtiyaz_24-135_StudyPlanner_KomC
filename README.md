@@ -1,88 +1,92 @@
-# Pertemuan 5 — User Interaction, State Management & Navigation
-Nurrahmadayeni, M.Kom. · Pemrograman Mobile USU
+# Study Planner - Tugas UTS Pemrograman Mobile
+**Valmai Imtiyaz** - 241401135 - Kom C
 
-Kelanjutan kartu mata kuliah Pertemuan 4. Source project ini memiliki empat entrypoint:
-- `lib/main_local.dart`: Tahap A, input nama, favorit, dan counter memakai setState.
-- `lib/main_catalog.dart`: Tahap B, katalog dan pencarian dengan Provider.
-- `lib/main_favorites.dart`: Tahap C, favorit bersama dan switch tampilan.
-- `lib/main.dart`: Tahap D, pencarian, favorit bersama, detail, profil, validasi, dan hasil navigasi memakai Provider + go_router.
+Aplikasi perencana studi pribadi (Study Planner) berbasis Flutter dengan implementasi State Management menggunakan Provider dan routing menggunakan GoRouter.
 
-## Menjalankan dari ZIP ini
-1. Ekstrak ZIP dan buka folder `mobile_usu_pertemuan5` di VS Code.
-2. Periksa Flutter SDK dengan `flutter --version` dan `flutter doctor`.
-3. Source ZIP tidak menyertakan folder platform hasil generator. Buat platform di folder proyek ini (tanpa --overwrite):
+## Daftar Versi Package
+Sesuai dengan berkas `pubspec.yaml`, proyek ini bergantung pada:
+- **Flutter SDK**: `>=3.29.0 <4.0.0`
+- **provider**: `^6.1.5+1`
+- **go_router**: `^16.2.1`
 
-```sh
-flutter create --project-name mobile_usu_pertemuan5 --platforms=android,web .
-flutter pub get
-```
+## Penjelasan Pemilik State dan Alur Data
+Aplikasi ini menggunakan `ChangeNotifierProvider` melalui kelas `CourseStore` sebagai pemilik state utama yang berjalan di memori lokal. 
+**Alur data pada fitur Tambah Favorit:** Saat pengguna menekan ikon hati pada komponen `CourseCard`, antarmuka akan memanggil fungsi `context.read<CourseStore>().toggleFavorite(id)`. Fungsi ini mengecek apakah ID aktivitas tersebut sudah ada di dalam Set `_favorites`. Jika belum, ID ditambahkan; jika sudah ada, ID dihapus. Setelah itu, `CourseStore` mengeksekusi `notifyListeners()`. Hal ini memicu semua widget yang memantau status (melalui `context.watch<CourseStore>()`) untuk merender ulang layarnya secara instan, mengubah warna ikon hati, dan memperbarui angka indikator di App Bar.
 
-Perintah generator mungkin menambahkan contoh `test/widget_test.dart` yang mengacu ke aplikasi counter bawaan. Hapus **hanya file contoh tersebut jika baru dibuat**; gunakan pengujian `test/course_store_test.dart` yang disertakan. Jangan memakai --overwrite karena dapat mengganti source latihan.
+## Skenario Uji
+Berikut adalah 12 skenario pengujian fungsional aplikasi:
 
-4. Tahap A:
-```sh
-flutter run -d chrome -t lib/main_local.dart
-```
-5. Tahap B dan C (hentikan run sebelumnya dahulu):
-```sh
-flutter run -d chrome -t lib/main_catalog.dart
-flutter run -d chrome -t lib/main_favorites.dart
-```
-Jalankan satu perintah run per tahap, bukan bersamaan.
+1. **Load Beranda**
+   - Aksi: Membuka aplikasi pertama kali.
+   - Ekspektasi: Tampil halaman Beranda dengan daftar 10 data aktivitas bawaan.
+   - Hasil Aktual: Beranda tampil beserta daftar aktivitas default.
+   - Status: Pass
 
-6. Tahap D:
-```sh
-flutter run -d chrome -t lib/main.dart
-```
-Untuk Android, gunakan ID dari `flutter devices` sebagai pengganti `chrome`.
+2. **Tambah Aktivitas Sukses**
+   - Aksi: Isi seluruh field form dengan data valid, klik "Tambah Aktivitas".
+   - Ekspektasi: Layar kembali ke Beranda, data baru muncul di daftar.
+   - Hasil Aktual: Aktivitas baru sukses tersimpan dan dirender.
+   - Status: Pass
 
-## Melanjutkan proyek Pertemuan 4 milik Anda
-Cadangkan proyek lama. Salin isi folder `lib` dari paket ini ke proyek latihan lanjutan, kemudian tambahkan `provider: ^6.1.5+1` dan `go_router: ^16.2.1` pada dependencies. Sesuaikan environment minimal Dart 3.7 / Flutter 3.29. Jalankan flutter pub get dan pilih main_local.dart dahulu. Jika nama package proyek berbeda, ubah import package pada file test agar mengikuti nama proyek Anda.
+3. **Validasi Form (Kosong)**
+   - Aksi: Kosongkan field "Nama Aktivitas", lalu klik "Tambah Aktivitas".
+   - Ekspektasi: Muncul teks peringatan merah "Nama aktivitas wajib diisi".
+   - Hasil Aktual: Muncul pesan error di bawah field teks form.
+   - Status: Pass
 
-## Versi
-Minimum yang dirujuk: Flutter 3.29 / Dart 3.7. Seri go_router 16 dipilih untuk latihan, bukan diklaim versi terbaru. Solver memilih versi dalam rentang pubspec yang kompatibel dengan SDK. Jika gagal, baca batas SDK pada pesan pub, jangan menghapus constraint sembarangan. Simpan pubspec.lock setelah resolusi sukses untuk kelas/kelompok Anda. Koneksi internet diperlukan saat pertama mengambil dependensi.
+4. **Validasi Form (Karakter)**
+   - Aksi: Isi field deskripsi dengan teks "tes", lalu klik "Tambah Aktivitas".
+   - Ekspektasi: Muncul teks peringatan merah "Deskripsi harus lebih dari 5 karakter".
+   - Hasil Aktual: Muncul pesan error validasi batas karakter.
+   - Status: Pass
 
-## Struktur
-- main.dart: tema dan provider di atas router.
-- main_local.dart: latihan state lokal.
-- app_router.dart: rute, ShellRoute, penanganan URL salah.
-- models/course.dart: model dan tiga data contoh (DEMO02/DEMO03 bukan kode MK resmi).
-- state/course_store.dart: nama, query, favorit; notifikasi perubahan.
-- pages/course_pages.dart: beranda, favorit, detail.
-- pages/profile_pages.dart: profil, Form edit, hasil pop.
-- widgets/app_shell.dart: AppBar dan bottom navigation.
-- widgets/course_card.dart: kartu lanjutan dari Pertemuan 4.
-- test/course_store_test.dart: validasi perilaku model.
+5. **Batal Input Form**
+   - Aksi: Buka form tambah aktivitas, lalu tekan ikon panah kembali di AppBar.
+   - Ekspektasi: Kembali ke layar sebelumnya tanpa ada penambahan data ke dalam state.
+   - Hasil Aktual: Navigasi kembali berhasil, data state tidak berubah.
+   - Status: Pass
 
-## Skenario demonstrasi
-1. Cari `mobile`; satu kartu sesuai ditampilkan. Cari `xyz`; tampil pesan kosong.
-2. Tandai ILK3105 sebagai favorit; indikator dan tab Favorit harus sesuai.
-3. Buka detail dari Favorit; ID dan parameter `from=favorites` terbaca.
-4. Hapus favorit dari detail; kembali; daftar dan hitungan ikut berubah.
-5. Edit profil: nama kosong/1 karakter ditolak; `  Rani  ` disimpan sebagai `Rani`.
-6. Batal edit; nama lama tetap. Simpan edit; sapaan beranda ikut berubah.
-7. Buka langsung `/#/course/ILK3105`; detail dapat mencari objek berdasarkan ID.
-8. Buka `/#/course/tidak-ada`; pesan data tidak ditemukan, tanpa crash.
-9. Buka `/#/edit-profile` tanpa extra; nama menggunakan fallback dari store.
-10. Refresh penuh: state dalam memori direset. Tidak ada persistence/database/API.
+6. **Edit Aktivitas**
+   - Aksi: Klik opsi "Edit", ubah judul pada kolom "Nama Aktivitas", klik "Simpan Perubahan".
+   - Ekspektasi: Nama aktivitas pada kartu berubah sesuai inputan teks terbaru.
+   - Hasil Aktual: Data sukses diperbarui di layar tanpa duplikasi.
+   - Status: Pass
 
-Untuk web, contoh menggunakan hash routing bawaan. Browser Back/Forward serta refresh URL perlu diuji pada perangkat/host yang dipakai. ShellRoute menjaga layout bersama, bukan otomatis menyimpan stack independen setiap tab; bahasan lanjutan menggunakan StatefulShellRoute.
+7. **Hapus Aktivitas**
+   - Aksi: Klik opsi "Hapus" pada salah satu kartu aktivitas, tekan "Ya" pada dialog konfirmasi.
+   - Ekspektasi: Aktivitas tersebut lenyap dari seluruh daftar di berbagai layar aplikasi.
+   - Hasil Aktual: Data terhapus sepenuhnya dari memori Provider.
+   - Status: Pass
 
-## Verifikasi lokal
-```sh
-flutter analyze
-flutter test test/course_store_test.dart
-```
-Flutter SDK tidak tersedia di lingkungan penyusunan materi. Source telah ditinjau, tetapi flutter analyze, flutter test, dan build aplikasi belum dieksekusi di sana. Jalankan perintah di atas pada mesin kuliah. Demo HTML pada slide adalah simulasi konsep, bukan hasil build Flutter.
+8. **Tambah Favorit**
+   - Aksi: Klik ikon hati (abu-abu) pada salah satu kartu aktivitas.
+   - Ekspektasi: Ikon hati berubah merah, aktivitas muncul di dalam menu halaman Favorit.
+   - Hasil Aktual: Data sukses dimasukkan ke list favorit.
+   - Status: Pass
 
-## Referensi
-PDF unggahan: Interaksi Pengguna, State Management, Navigasi & Data Passing di Flutter (38 halaman).
-https://docs.flutter.dev/cookbook/forms/validation
-https://api.flutter.dev/flutter/widgets/State/setState.html
-https://docs.flutter.dev/data-and-backend/state-mgmt/simple
-https://pub.dev/packages/provider
-https://pub.dev/packages/go_router/versions/16.2.1
-https://pub.dev/documentation/go_router/latest/topics/Navigation-topic.html
+9. **Hapus Favorit**
+   - Aksi: Klik ikon hati (merah) pada aktivitas yang berada di dalam menu Favorit.
+   - Ekspektasi: Ikon kembali abu-abu, aktivitas langsung lenyap dari halaman Favorit.
+   - Hasil Aktual: Data sukses dihapus dari list favorit.
+   - Status: Pass
 
-## Panduan praktik dan tugas UTS
-Baca PANDUAN_PRAKTIK.md secara berurutan: Bagian I teori, Bagian II praktik berdasarkan desain lalu kode dan hasil, Bagian III tugas individu/kelompok menuju UTS. Pada HTML, tombol Salin berkas lengkap menyalin seluruh source, sedangkan cuplikan kode digunakan untuk pembahasan. Tugas Study Planner, dua modul CRUD kelompok, milestone, rubrik, dan kriteria frontend selesai tetap tercantum. Empat entrypoint merupakan source inti pertemuan. CRUD aktivitas, loading/error simulasi, dan dua modul domain adalah pengembangan yang harus mahasiswa kerjakan, bukan fitur yang sudah diimplementasikan dalam source inti.
+10. **Buka Favorit Kosong**
+    - Aksi: Hapus semua data di menu favorit, lalu buka kembali menu Favorit.
+    - Ekspektasi: Muncul tampilan khusus bertuliskan "Belum Ada Favorit".
+    - Hasil Aktual: Tampil indikator antarmuka layar kosong.
+    - Status: Pass
+
+11. **Filter Pencarian (Valid)**
+    - Aksi: Ketik "Slicing" pada kolom pencarian di halaman Beranda.
+    - Ekspektasi: Daftar di bawahnya hanya menampilkan aktivitas yang mengandung kata "Slicing".
+    - Hasil Aktual: Daftar terfilter dengan akurat sesuai input teks.
+    - Status: Pass
+
+12. **Edit Profil Sukses**
+    - Aksi: Buka menu Profil, ubah nama dari "Mahasiswa" menjadi "Valmai Imtiyaz", klik Simpan.
+    - Ekspektasi: Teks sapaan di Beranda dan nama di halaman Profil berubah secara serentak.
+    - Hasil Aktual: State string nama profil sukses diperbarui.
+    - Status: Pass
+
+## Link Video Demonstrasi
+https://www.youtube.com/watch?v=cWOwf0kKIcM
