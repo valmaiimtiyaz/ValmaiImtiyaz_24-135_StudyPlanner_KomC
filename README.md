@@ -1,4 +1,4 @@
-# Study Planner - Tugas UTS Pemrograman Mobile
+# Study Planner 
 **Valmai Imtiyaz** - 241401135 - Kom C
 
 Aplikasi perencana studi pribadi (Study Planner) berbasis Flutter dengan implementasi State Management menggunakan Provider dan routing menggunakan GoRouter.
