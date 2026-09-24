@@ -1,0 +1,17 @@
+name: mobile_usu_pertemuan5
+description: Lanjutan kartu mata kuliah - interaksi, state, navigasi, dan data passing.
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=3.7.0 <4.0.0'
+  flutter: '>=3.29.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.5+1
+  go_router: ^16.2.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
